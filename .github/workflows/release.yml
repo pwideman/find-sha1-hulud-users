@@ -107,11 +107,11 @@ jobs:
         run: |
           # Extract major version
           MAJOR_VERSION=$(echo "${{ steps.version.outputs.new_version }}" | cut -d. -f1)
-          
+
           # Delete existing major version tag if it exists
           git tag -d "v$MAJOR_VERSION" 2>/dev/null || true
           git push origin ":refs/tags/v$MAJOR_VERSION" 2>/dev/null || true
-          
+
           # Create new major version tag pointing to current commit
           git tag "v$MAJOR_VERSION"
           git push origin "v$MAJOR_VERSION"
