@@ -1,3 +1,3 @@
-# sha1-hulud-actions
+# find-sha1-hulud-users
 
-Custom actions to look for potential Sha1-Hulud activity related to your GitHub Enterprise
+A custom GitHub action to find Enterprise Organization members and outside collaborators with potential Sha1-Hulud activity.

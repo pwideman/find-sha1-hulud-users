@@ -1,5 +1,5 @@
-name: "Find SHA1-Hulud Users"
-description: "Custom action to look for potential SHA1-Hulud activity related to your GitHub Enterprise"
+name: "Find Sha1-Hulud Users"
+description: "Custom action to look for potential Sha1-Hulud activity related to your GitHub Enterprise"
 author: "Paul Wideman"
 
 branding:
