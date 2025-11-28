@@ -39,7 +39,7 @@ The action entrypoint should be `src/index.ts` which imports and calls the main 
 
 ```typescript
 // src/index.ts
-import { run } from "./main.js";
+import { run } from './main.js';
 
 run();
 ```
@@ -50,18 +50,18 @@ Use async/await with try-catch for the main action logic:
 
 ```typescript
 // src/main.ts
-import * as core from "@actions/core";
+import * as core from '@actions/core';
 
 export async function run(): Promise<void> {
   try {
     // Get inputs
-    const myInput = core.getInput("my-input", { required: true });
+    const myInput = core.getInput('my-input', { required: true });
 
     // Action logic here
     core.debug(`Processing input: ${myInput}`);
 
     // Set outputs
-    core.setOutput("result", "success");
+    core.setOutput('result', 'success');
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message);
@@ -88,7 +88,7 @@ Always use the `@actions/core` package for:
 For GitHub API interactions, use the `octokit` package:
 
 ```typescript
-import { Octokit } from "octokit";
+import { Octokit } from 'octokit';
 
 const octokit = new Octokit({ auth: token });
 const context = github.context;
@@ -99,8 +99,8 @@ const context = github.context;
 Use `.js` extensions in import statements for ESM compatibility:
 
 ```typescript
-import { myFunction } from "./utils.js"; // ✓ Correct
-import { myFunction } from "./utils"; // ✗ Avoid
+import { myFunction } from './utils.js'; // ✓ Correct
+import { myFunction } from './utils'; // ✗ Avoid
 ```
 
 ## Testing Guidelines
@@ -114,9 +114,9 @@ import { myFunction } from "./utils"; // ✗ Avoid
 
 ```typescript
 // __tests__/main.test.ts
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-describe("main", () => {
+describe('main', () => {
   beforeEach(() => {
     // Setup
   });
@@ -125,7 +125,7 @@ describe("main", () => {
     vi.resetAllMocks();
   });
 
-  it("should do something", async () => {
+  it('should do something', async () => {
     // Arrange
     // Act
     // Assert
@@ -139,7 +139,7 @@ Create mock fixtures for the actions toolkit:
 
 ```typescript
 // __fixtures__/core.ts
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
 export const getInput = vi.fn();
 export const setOutput = vi.fn();
@@ -153,7 +153,7 @@ export const error = vi.fn();
 Use `vi.mock()` to mock modules:
 
 ```typescript
-vi.mock("@actions/core", () => import("../__fixtures__/core.js"));
+vi.mock('@actions/core', () => import('../__fixtures__/core.js'));
 ```
 
 ### Testing Environment Variables
@@ -161,7 +161,7 @@ vi.mock("@actions/core", () => import("../__fixtures__/core.js"));
 Set `INPUT_*` environment variables to simulate action inputs:
 
 ```typescript
-process.env["INPUT_MY-INPUT"] = "test-value";
+process.env['INPUT_MY-INPUT'] = 'test-value';
 ```
 
 ## Bundling
@@ -172,16 +172,16 @@ Configure Rollup to bundle all dependencies into a single file:
 
 ```typescript
 // rollup.config.ts
-import commonjs from "@rollup/plugin-commonjs";
-import nodeResolve from "@rollup/plugin-node-resolve";
-import typescript from "@rollup/plugin-typescript";
+import commonjs from '@rollup/plugin-commonjs';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
 
 export default {
-  input: "src/index.ts",
+  input: 'src/index.ts',
   output: {
     esModule: true,
-    file: "dist/index.js",
-    format: "es",
+    file: 'dist/index.js',
+    format: 'es',
     sourcemap: true,
   },
   plugins: [typescript(), nodeResolve({ preferBuiltins: true }), commonjs()],
@@ -224,27 +224,27 @@ Standard npm scripts to include:
 Define action metadata with proper inputs, outputs, and runtime:
 
 ```yaml
-name: "Action Name"
-description: "Action description"
-author: "Author Name"
+name: 'Action Name'
+description: 'Action description'
+author: 'Author Name'
 
 branding:
-  icon: "check-circle"
-  color: "green"
+  icon: 'check-circle'
+  color: 'green'
 
 inputs:
   my-input:
-    description: "Description of the input"
+    description: 'Description of the input'
     required: true
-    default: "default-value"
+    default: 'default-value'
 
 outputs:
   result:
-    description: "Description of the output"
+    description: 'Description of the output'
 
 runs:
-  using: "node20"
-  main: "dist/index.js"
+  using: 'node20'
+  main: 'dist/index.js'
 ```
 
 ## Error Handling
@@ -262,7 +262,7 @@ try {
   if (error instanceof Error) {
     core.setFailed(`Action failed: ${error.message}`);
   } else {
-    core.setFailed("Action failed with unknown error");
+    core.setFailed('Action failed with unknown error');
   }
 }
 ```

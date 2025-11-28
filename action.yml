@@ -1,11 +1,11 @@
-name: "Find Sha1-Hulud Users"
-description: "Custom action to look for potential Sha1-Hulud activity related to your GitHub Enterprise"
-author: "Paul Wideman"
+name: 'Find Sha1-Hulud Users'
+description: 'Custom action to look for potential Sha1-Hulud activity related to your GitHub Enterprise'
+author: 'Paul Wideman'
 
 branding:
-  icon: "search"
-  color: "orange"
+  icon: 'search'
+  color: 'orange'
 
 runs:
-  using: "node20"
-  main: "dist/index.js"
+  using: 'node20'
+  main: 'dist/index.js'
