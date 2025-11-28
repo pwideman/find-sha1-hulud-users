@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import * as core from "../__fixtures__/core.js";
+import * as core from "../__fixtures__/core";
 
-vi.mock("@actions/core", () => import("../__fixtures__/core.js"));
+vi.mock("@actions/core", () => import("../__fixtures__/core"));
 
 describe("main", () => {
   beforeEach(() => {
@@ -13,7 +13,7 @@ describe("main", () => {
   });
 
   it("should log a message when run is called", async () => {
-    const { run } = await import("../src/main.js");
+    const { run } = await import("../src/main");
 
     await run();
 
