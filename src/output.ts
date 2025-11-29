@@ -12,6 +12,18 @@ export interface SummaryStats {
   totalMemberships: number;
 }
 
+/**
+ * Escapes HTML special characters to prevent XSS in workflow summaries.
+ */
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export function calculateStats(results: UserResult[]): SummaryStats {
   let totalRepositories = 0;
   let usersWithMemberships = 0;
@@ -67,15 +79,18 @@ export async function writeSummary(results: UserResult[], stats: SummaryStats): 
     ];
 
     for (const user of results) {
-      const repoLinks = user.repositories.map((r) => `<a href="${r.url}">${r.repo}</a>`).join(', ');
+      const escapedUsername = escapeHtml(user.username);
+      const repoLinks = user.repositories
+        .map((r) => `<a href="${escapeHtml(r.url)}">${escapeHtml(r.repo)}</a>`)
+        .join(', ');
 
       const memberships =
         user.memberships.length > 0
-          ? user.memberships.map((m) => `${m.org} (${m.type})`).join(', ')
+          ? user.memberships.map((m) => `${escapeHtml(m.org)} (${escapeHtml(m.type)})`).join(', ')
           : 'None';
 
       tableRows.push([
-        `<a href="https://github.com/${user.username}">${user.username}</a>`,
+        `<a href="https://github.com/${escapedUsername}">${escapedUsername}</a>`,
         repoLinks,
         memberships,
       ]);
