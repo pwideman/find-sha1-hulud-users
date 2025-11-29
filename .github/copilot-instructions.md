@@ -277,3 +277,4 @@ Common packages:
 - Validate and sanitize all inputs
 - Be cautious with `exec` and shell commands
 - Use minimal required permissions
+- Always use specific NPM package references, do not use semver ranges for dependencies
