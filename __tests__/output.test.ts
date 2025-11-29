@@ -109,12 +109,9 @@ describe('output module', () => {
 
       const csv = generateCSVContent(results);
 
-      expect(csv).toContain(
-        'Username,Profile URL,Repository Count,Repositories,Has Enterprise Membership,Memberships',
-      );
+      expect(csv).toContain('Username,Profile URL,Repository Count,Repositories,Memberships');
       expect(csv).toContain('user1');
       expect(csv).toContain('https://github.com/user1');
-      expect(csv).toContain('Yes');
       expect(csv).toContain('org1 (member)');
     });
 
@@ -147,24 +144,7 @@ describe('output module', () => {
 
       const csv = generateCSVContent([]);
 
-      expect(csv).toBe(
-        'Username,Profile URL,Repository Count,Repositories,Has Enterprise Membership,Memberships',
-      );
-    });
-
-    it('should show No for users without memberships', async () => {
-      const { generateCSVContent } = await import('../src/output');
-
-      const results = [
-        {
-          username: 'user1',
-          repositories: [{ owner: 'user1', repo: 'repo1', url: 'https://github.com/user1/repo1' }],
-          memberships: [],
-        },
-      ];
-
-      const csv = generateCSVContent(results);
-      expect(csv).toContain('No');
+      expect(csv).toBe('Username,Profile URL,Repository Count,Repositories,Memberships');
     });
 
     it('should escape values with quotes', async () => {
@@ -176,7 +156,7 @@ describe('output module', () => {
           repositories: [
             { owner: 'user"name', repo: 'repo1', url: 'https://github.com/user"name/repo1' },
           ],
-          memberships: [],
+          memberships: [{ org: 'org1', type: 'member' as const }],
         },
       ];
 
@@ -194,7 +174,7 @@ describe('output module', () => {
           repositories: [
             { owner: 'user\nname', repo: 'repo1', url: 'https://github.com/username/repo1' },
           ],
-          memberships: [],
+          memberships: [{ org: 'org1', type: 'member' as const }],
         },
       ];
 
@@ -214,7 +194,7 @@ describe('output module', () => {
             { owner: 'user1', repo: 'repo2', url: 'https://github.com/user1/repo2' },
             { owner: 'user1', repo: 'repo3', url: 'https://github.com/user1/repo3' },
           ],
-          memberships: [],
+          memberships: [{ org: 'org1', type: 'member' as const }],
         },
       ];
 
@@ -233,7 +213,7 @@ describe('output module', () => {
             { owner: 'user1', repo: 'repo1', url: 'https://github.com/user1/repo1' },
             { owner: 'user1', repo: 'repo2', url: 'https://github.com/user1/repo2' },
           ],
-          memberships: [],
+          memberships: [{ org: 'org1', type: 'member' as const }],
         },
       ];
 
@@ -303,9 +283,7 @@ describe('output module', () => {
 
       const content = fs.readFileSync(csvPath, 'utf-8');
       // Should only contain headers
-      expect(content).toBe(
-        'Username,Profile URL,Repository Count,Repositories,Has Enterprise Membership,Memberships',
-      );
+      expect(content).toBe('Username,Profile URL,Repository Count,Repositories,Memberships');
     });
 
     it('should write correct content to CSV file', async () => {
@@ -334,7 +312,6 @@ describe('output module', () => {
       expect(content).toContain('testuser');
       expect(content).toContain('https://github.com/testuser');
       expect(content).toContain('https://github.com/testuser/infected-repo');
-      expect(content).toContain('Yes');
       expect(content).toContain('myorg (member)');
     });
   });

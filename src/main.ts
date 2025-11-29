@@ -39,14 +39,17 @@ export async function run(): Promise<void> {
     const memberships = await checkUserMemberships(octokit, organizations, usernames);
 
     // Step 4: Aggregate results
-    const results = aggregateResults(repositories, memberships);
-    const stats = calculateStats(results);
+    const allResults = aggregateResults(repositories, memberships);
 
-    // Step 5: Write summary
-    await writeSummary(results, stats);
+    // Filter to only include users with enterprise memberships
+    const usersWithMemberships = allResults.filter((user) => user.memberships.length > 0);
+    const stats = calculateStats(allResults);
 
-    // Step 6: Write CSV to output directory
-    writeCSVToOutputDir(results, outputDir);
+    // Step 5: Write summary (only users with memberships)
+    await writeSummary(usersWithMemberships, stats);
+
+    // Step 6: Write CSV to output directory (only users with memberships)
+    writeCSVToOutputDir(usersWithMemberships, outputDir);
 
     // Set outputs
     core.setOutput('users-found', stats.usersWithMemberships);

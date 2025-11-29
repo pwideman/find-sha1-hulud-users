@@ -27369,12 +27369,14 @@ async function run() {
         const usernames = repositories.map((r) => r.owner);
         const memberships = await (0, github_js_1.checkUserMemberships)(octokit, organizations, usernames);
         // Step 4: Aggregate results
-        const results = (0, github_js_1.aggregateResults)(repositories, memberships);
-        const stats = (0, output_js_1.calculateStats)(results);
-        // Step 5: Write summary
-        await (0, output_js_1.writeSummary)(results, stats);
-        // Step 6: Write CSV to output directory
-        (0, output_js_1.writeCSVToOutputDir)(results, outputDir);
+        const allResults = (0, github_js_1.aggregateResults)(repositories, memberships);
+        // Filter to only include users with enterprise memberships
+        const usersWithMemberships = allResults.filter((user) => user.memberships.length > 0);
+        const stats = (0, output_js_1.calculateStats)(allResults);
+        // Step 5: Write summary (only users with memberships)
+        await (0, output_js_1.writeSummary)(usersWithMemberships, stats);
+        // Step 6: Write CSV to output directory (only users with memberships)
+        (0, output_js_1.writeCSVToOutputDir)(usersWithMemberships, outputDir);
         // Set outputs
         core.setOutput('users-found', stats.usersWithMemberships);
         core.setOutput('repos-found', stats.totalRepositories);
@@ -27487,7 +27489,7 @@ async function writeSummary(results, stats) {
         .write();
     // Add user table if there are results
     if (results.length > 0) {
-        await core.summary.addHeading('Users with Sha1-Hulud Repositories', 2).write();
+        await core.summary.addHeading('Enterprise Users with Sha1-Hulud Repositories', 2).write();
         const tableRows = [
             [
                 { data: 'Username', header: true },
@@ -27512,7 +27514,7 @@ async function writeSummary(results, stats) {
         await core.summary.addTable(tableRows).write();
     }
     else {
-        await core.summary.addRaw('No users with Sha1-Hulud repositories found.').write();
+        await core.summary.addRaw('No enterprise users with Sha1-Hulud repositories found.').write();
     }
     core.info('Workflow summary written successfully');
 }
@@ -27527,20 +27529,12 @@ function formatRepositoriesForCSV(repos) {
     return repos.map((r) => r.url).join('; ');
 }
 function generateCSVContent(results) {
-    const headers = [
-        'Username',
-        'Profile URL',
-        'Repository Count',
-        'Repositories',
-        'Has Enterprise Membership',
-        'Memberships',
-    ];
+    const headers = ['Username', 'Profile URL', 'Repository Count', 'Repositories', 'Memberships'];
     const rows = results.map((user) => [
         escapeCSV(user.username),
         escapeCSV(`https://github.com/${user.username}`),
         user.repositories.length.toString(),
         escapeCSV(formatRepositoriesForCSV(user.repositories)),
-        user.memberships.length > 0 ? 'Yes' : 'No',
         escapeCSV(user.memberships.map((m) => `${m.org} (${m.type})`).join('; ')),
     ]);
     const csvLines = [headers.join(','), ...rows.map((row) => row.join(','))];

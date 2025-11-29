@@ -66,7 +66,7 @@ export async function writeSummary(results: UserResult[], stats: SummaryStats): 
 
   // Add user table if there are results
   if (results.length > 0) {
-    await core.summary.addHeading('Users with Sha1-Hulud Repositories', 2).write();
+    await core.summary.addHeading('Enterprise Users with Sha1-Hulud Repositories', 2).write();
 
     const tableRows: ({ data: string; header: true } | string)[][] = [
       [
@@ -96,7 +96,7 @@ export async function writeSummary(results: UserResult[], stats: SummaryStats): 
 
     await core.summary.addTable(tableRows).write();
   } else {
-    await core.summary.addRaw('No users with Sha1-Hulud repositories found.').write();
+    await core.summary.addRaw('No enterprise users with Sha1-Hulud repositories found.').write();
   }
 
   core.info('Workflow summary written successfully');
@@ -115,21 +115,13 @@ function formatRepositoriesForCSV(repos: SearchResult[]): string {
 }
 
 export function generateCSVContent(results: UserResult[]): string {
-  const headers = [
-    'Username',
-    'Profile URL',
-    'Repository Count',
-    'Repositories',
-    'Has Enterprise Membership',
-    'Memberships',
-  ];
+  const headers = ['Username', 'Profile URL', 'Repository Count', 'Repositories', 'Memberships'];
 
   const rows = results.map((user) => [
     escapeCSV(user.username),
     escapeCSV(`https://github.com/${user.username}`),
     user.repositories.length.toString(),
     escapeCSV(formatRepositoriesForCSV(user.repositories)),
-    user.memberships.length > 0 ? 'Yes' : 'No',
     escapeCSV(user.memberships.map((m) => `${m.org} (${m.type})`).join('; ')),
   ]);
 
