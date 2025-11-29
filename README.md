@@ -9,7 +9,7 @@ This action helps identify GitHub Enterprise users that may have been compromise
 1. **Enumerate Organizations**: Fetches all organizations in the specified GitHub Enterprise
 2. **Search for Infected Repositories**: Searches GitHub for public repositories containing the Sha1-Hulud signature ("Sha1-Hulud: The Second Coming")
 3. **Check User Memberships**: For each repository owner found, checks if they are a member or outside collaborator of any enterprise organization (with concurrent API requests and caching)
-4. **Generate Reports**: Produces a workflow summary with statistics and a detailed table, plus a CSV artifact for further analysis
+4. **Generate Reports**: Produces a workflow summary with statistics and a detailed table, plus a CSV file for further analysis
 
 ## Usage
 
@@ -19,14 +19,16 @@ This action helps identify GitHub Enterprise users that may have been compromise
   with:
     github-token: ${{ secrets.ENTERPRISE_TOKEN }}
     enterprise: 'your-enterprise-slug'
+    output-dir: 'reports'
 ```
 
 ## Inputs
 
-| Input          | Description                                                                                            | Required |
-| -------------- | ------------------------------------------------------------------------------------------------------ | -------- |
-| `github-token` | GitHub token with `admin:org` read permissions to access enterprise organizations and check membership | Yes      |
-| `enterprise`   | The slug of the GitHub Enterprise to scan for potentially compromised users                            | Yes      |
+| Input          | Description                                                                                            | Required | Default |
+| -------------- | ------------------------------------------------------------------------------------------------------ | -------- | ------- |
+| `github-token` | GitHub token with `admin:org` read permissions to access enterprise organizations and check membership | Yes      |         |
+| `enterprise`   | The slug of the GitHub Enterprise to scan for potentially compromised users                            | Yes      |         |
+| `output-dir`   | Directory to write the CSV output file (`sha1-hulud-users.csv`). Can be a full or relative path.       | No       | `.`     |
 
 ### Token Permissions
 
@@ -43,9 +45,9 @@ The GitHub token needs the following permissions:
 | `users-found` | Number of unique users with Sha1-Hulud repositories found in enterprise organizations |
 | `repos-found` | Number of Sha1-Hulud repositories found                                               |
 
-## Artifacts
+## CSV Output
 
-The action produces a CSV artifact named `sha1-hulud-users` containing:
+The action produces a CSV file named `sha1-hulud-users.csv` in the directory specified by the `output-dir` input containing:
 
 - Username
 - Profile URL
@@ -53,6 +55,8 @@ The action produces a CSV artifact named `sha1-hulud-users` containing:
 - Repository URLs
 - Whether the user has enterprise membership
 - List of organization memberships and their type (member or outside collaborator)
+
+The directory will be created if it does not exist.
 
 ## Example Workflow
 
@@ -73,12 +77,13 @@ jobs:
         with:
           github-token: ${{ secrets.ENTERPRISE_TOKEN }}
           enterprise: 'your-enterprise-slug'
+          output-dir: 'reports'
 
-      - name: Download CSV Report
-        uses: actions/download-artifact@v4
+      - name: Upload CSV Report
+        uses: actions/upload-artifact@v4
         with:
           name: sha1-hulud-users
-          path: reports/
+          path: reports/sha1-hulud-users.csv
 ```
 
 ## Development

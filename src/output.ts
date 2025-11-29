@@ -1,9 +1,7 @@
 import * as core from '@actions/core';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
-import * as artifact from '@actions/artifact';
-import type { UserResult, SearchResult } from './github';
+import type { SearchResult, UserResult } from './github.js';
 
 export interface SummaryStats {
   totalRepositories: number;
@@ -139,21 +137,25 @@ export function generateCSVContent(results: UserResult[]): string {
   return csvLines.join('\n');
 }
 
-export async function uploadCSVArtifact(results: UserResult[]): Promise<void> {
-  core.info('Generating CSV artifact...');
+const CSV_FILENAME = 'sha1-hulud-users.csv';
+
+export function writeCSVToOutputDir(results: UserResult[], outputDir: string): void {
+  core.info('Generating CSV output...');
 
   const csvContent = generateCSVContent(results);
-  const tmpDir = process.env.RUNNER_TEMP || os.tmpdir();
-  const csvPath = path.join(tmpDir, 'sha1-hulud-users.csv');
 
-  // Write CSV to temporary file
+  // Resolve the directory (handles both absolute and relative paths)
+  const resolvedDir = path.resolve(outputDir);
+  const csvPath = path.join(resolvedDir, CSV_FILENAME);
+
+  // Create directory if it doesn't exist
+  if (!fs.existsSync(resolvedDir)) {
+    fs.mkdirSync(resolvedDir, { recursive: true });
+    core.info(`Created directory: ${resolvedDir}`);
+  }
+
+  // Write CSV to output directory
   fs.writeFileSync(csvPath, csvContent, 'utf-8');
 
   core.info(`CSV file written to ${csvPath}`);
-
-  // Upload artifact
-  const artifactClient = new artifact.DefaultArtifactClient();
-  await artifactClient.uploadArtifact('sha1-hulud-users', [csvPath], tmpDir);
-
-  core.info('CSV artifact uploaded successfully');
 }

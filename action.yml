@@ -13,6 +13,10 @@ inputs:
   enterprise:
     description: 'The slug of the GitHub Enterprise to scan for potentially compromised users'
     required: true
+  output-dir:
+    description: 'Directory to write the CSV output file (sha1-hulud-users.csv). Can be a full path or relative path. Directory will be created if it does not exist.'
+    required: false
+    default: '.'
 
 outputs:
   users-found:

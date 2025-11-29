@@ -1,5 +1,5 @@
-import { Octokit } from 'octokit';
 import * as core from '@actions/core';
+import { Octokit } from 'octokit';
 
 // Search query to find Sha1-Hulud worm repositories
 const SEARCH_QUERY = 'Sha1-Hulud: The Second Coming';

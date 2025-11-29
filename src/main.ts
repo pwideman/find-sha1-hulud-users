@@ -1,18 +1,19 @@
 import * as core from '@actions/core';
 import { Octokit } from 'octokit';
 import {
+  aggregateResults,
+  checkUserMemberships,
   getEnterpriseOrganizations,
   searchSha1HuludRepositories,
-  checkUserMemberships,
-  aggregateResults,
-} from './github';
-import { calculateStats, writeSummary, uploadCSVArtifact } from './output';
+} from './github.js';
+import { calculateStats, writeCSVToOutputDir, writeSummary } from './output.js';
 
 export async function run(): Promise<void> {
   try {
     // Get inputs
     const token = core.getInput('github-token', { required: true });
     const enterprise = core.getInput('enterprise', { required: true });
+    const outputDir = core.getInput('output-dir') || '.';
 
     core.info('Starting Sha1-Hulud user scan...');
 
@@ -44,8 +45,8 @@ export async function run(): Promise<void> {
     // Step 5: Write summary
     await writeSummary(results, stats);
 
-    // Step 6: Upload CSV artifact
-    await uploadCSVArtifact(results);
+    // Step 6: Write CSV to output directory
+    writeCSVToOutputDir(results, outputDir);
 
     // Set outputs
     core.setOutput('users-found', stats.usersWithMemberships);

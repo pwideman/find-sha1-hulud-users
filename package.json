@@ -34,7 +34,6 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@actions/artifact": "4.0.0",
     "@actions/core": "1.11.1",
     "octokit": "5.0.5"
   },
