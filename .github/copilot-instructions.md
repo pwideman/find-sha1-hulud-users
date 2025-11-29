@@ -93,6 +93,15 @@ const octokit = new Octokit({ auth: token });
 const context = github.context;
 ```
 
+### File Extensions
+
+Use `.js` extensions in import statements for ESM compatibility:
+
+```typescript
+import { myFunction } from './utils.js'; // ✓ Correct
+import { myFunction } from './utils'; // ✗ Avoid
+```
+
 ### Use modules
 
 Split functionality into separate modules under `src/` for better organization and testability. Group related functions and types together.
@@ -277,3 +286,4 @@ Common packages:
 - Validate and sanitize all inputs
 - Be cautious with `exec` and shell commands
 - Use minimal required permissions
+- Always use specific NPM package references, do not use semver ranges for dependencies

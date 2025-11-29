@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # Ignore TypeScript build output
 lib
+
+# Ignore temp/test output
+out
