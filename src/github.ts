@@ -19,12 +19,35 @@ export type MembershipType = 'member' | 'outside_collaborator' | 'none';
 
 export interface OrganizationInfo {
   login: string;
+  outsideCollaborators: Set<string>;
 }
 
 export interface UserResult {
   username: string;
   repositories: SearchResult[];
   memberships: { org: string; type: MembershipType }[];
+}
+
+async function fetchOutsideCollaborators(octokit: Octokit, org: string): Promise<Set<string>> {
+  const collaborators = new Set<string>();
+
+  try {
+    const iterator = octokit.paginate.iterator(octokit.rest.orgs.listOutsideCollaborators, {
+      org,
+      per_page: 100,
+    });
+
+    for await (const response of iterator) {
+      for (const collaborator of response.data) {
+        collaborators.add(collaborator.login.toLowerCase());
+      }
+    }
+  } catch {
+    // If we can't fetch collaborators, return empty set
+    core.debug(`Could not fetch outside collaborators for org: ${org}`);
+  }
+
+  return collaborators;
 }
 
 export async function getEnterpriseOrganizations(
@@ -62,14 +85,32 @@ export async function getEnterpriseOrganizations(
       { enterprise },
     );
 
+    const orgLogins: string[] = [];
     for await (const response of iterator) {
       const nodes = response.enterprise?.organizations?.nodes ?? [];
       for (const org of nodes) {
-        organizations.push({ login: org.login });
+        orgLogins.push(org.login);
       }
     }
 
-    core.info(`Found ${organizations.length} organizations in enterprise`);
+    core.info(`Found ${orgLogins.length} organizations in enterprise`);
+    core.info('Fetching outside collaborators for all organizations...');
+
+    // Fetch outside collaborators for all organizations concurrently
+    const collaboratorPromises = orgLogins.map(async (login) => {
+      const outsideCollaborators = await fetchOutsideCollaborators(octokit, login);
+      return { login, outsideCollaborators };
+    });
+
+    const results = await Promise.all(collaboratorPromises);
+    organizations.push(...results);
+
+    const totalCollaborators = organizations.reduce(
+      (sum, org) => sum + org.outsideCollaborators.size,
+      0,
+    );
+    core.info(`Cached ${totalCollaborators} outside collaborators across all organizations`);
+
     return organizations;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -110,33 +151,19 @@ export async function searchSha1HuludRepositories(octokit: Octokit): Promise<Sea
 
 async function checkUserMembershipInOrg(
   octokit: Octokit,
-  org: string,
+  org: OrganizationInfo,
   username: string,
 ): Promise<MembershipType> {
   try {
     // Check if user is a member (this checks both public and private membership)
-    await octokit.rest.orgs.checkMembershipForUser({ org, username });
+    await octokit.rest.orgs.checkMembershipForUser({ org: org.login, username });
     return 'member';
   } catch {
-    // Not a member, check if outside collaborator using pagination
-    try {
-      const iterator = octokit.paginate.iterator(octokit.rest.orgs.listOutsideCollaborators, {
-        org,
-        per_page: 100,
-      });
-
-      for await (const response of iterator) {
-        const isCollaborator = response.data.some(
-          (c: { login: string }) => c.login.toLowerCase() === username.toLowerCase(),
-        );
-        if (isCollaborator) {
-          return 'outside_collaborator';
-        }
-      }
-      return 'none';
-    } catch {
-      return 'none';
+    // Not a member, check cached outside collaborators
+    if (org.outsideCollaborators.has(username.toLowerCase())) {
+      return 'outside_collaborator';
     }
+    return 'none';
   }
 }
 
@@ -171,7 +198,7 @@ export async function checkUserMemberships(
 
     // Check membership in all organizations concurrently
     const orgPromises = organizations.map(async (org) => {
-      const membership = await checkUserMembershipInOrg(octokit, org.login, username);
+      const membership = await checkUserMembershipInOrg(octokit, org, username);
       if (membership !== 'none') {
         userMembership.organizations.set(org.login, membership);
       }

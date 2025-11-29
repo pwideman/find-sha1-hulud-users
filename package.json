@@ -33,20 +33,20 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@actions/artifact": "^4.0.0",
-    "@actions/core": "^1.11.1",
-    "octokit": "^5.0.3"
+    "@actions/artifact": "4.0.0",
+    "@actions/core": "1.11.1",
+    "octokit": "5.0.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@vercel/ncc": "^0.38.3",
-    "@vitest/coverage-v8": "^4.0.14",
-    "eslint": "^9.39.1",
-    "globals": "^16.5.0",
-    "jiti": "^2.6.1",
-    "prettier": "^3.7.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0",
-    "vitest": "^4.0.14"
+    "@eslint/js": "9.39.1",
+    "@vercel/ncc": "0.38.4",
+    "@vitest/coverage-v8": "4.0.14",
+    "eslint": "9.39.1",
+    "globals": "16.5.0",
+    "jiti": "2.6.1",
+    "prettier": "3.7.2",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.48.0",
+    "vitest": "4.0.14"
   }
 }
